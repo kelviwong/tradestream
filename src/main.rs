@@ -16,7 +16,7 @@ async fn main() {
     let symbols = "btcusdt@kline_1m";
     startBinance(symbols.to_string(), success_callback);
 
-    let symbols = "BTC-USDT";
+    let symbols = "BTC-USDT@candle1m";
     startOKX(symbols.to_string(), success_callback);
 
     println!("connected... ");
