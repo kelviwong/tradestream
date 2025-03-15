@@ -55,7 +55,7 @@ fn startBinance(symbols: String, success_callback: impl FnOnce(String) + Send + 
                         retries += 1;
                         if retries < max_retries {
                             // Introduce a delay before retrying
-                            let delay = Duration::from_secs(2);
+                            let delay = Duration::from_secs(30);
                             sleep(delay).await;
                         } else {
                             eprintln!("Max retries reached. Exiting...");
