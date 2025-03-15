@@ -1,5 +1,4 @@
 use std::thread;
-use std::{thread::sleep, time::Duration};
 use tokio::runtime::Builder;
 
 use MarketDataFeed::binance::Binance;
@@ -16,8 +15,8 @@ async fn main() {
     let symbols = "btcusdt@kline_1m";
     startBinance(symbols.to_string(), success_callback);
 
-    let symbols = "BTC-USDT@candle1m";
-    startOKX(symbols.to_string(), success_callback);
+    // let symbols = "BTC-USDT@candle1m";
+    // startOKX(symbols.to_string(), success_callback);
 
     println!("connected... ");
     let _ = ctrl_c().await;
