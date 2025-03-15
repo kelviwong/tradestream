@@ -35,7 +35,7 @@ fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 's
     }
 
     let binance_thread = thread::spawn(move || {
-        let rt = match Builder::new_multi_thread()
+        let rt: tokio::runtime::Runtime = match Builder::new_multi_thread()
             .worker_threads(1) // Only 1 thread for Binance
             .enable_all()
             .build()
