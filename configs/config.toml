@@ -1,0 +1,9 @@
+[binance]
+base_url = "wss://stream.binance.com:9443/ws/"
+symbol = "btcusdt@kline_1m"
+enable = true
+
+[okx]
+base_url = "wss://ws.okx.com:8443/ws/v5/business"
+symbol = "BTC-USDT@candle1m"
+enable = true

@@ -1,0 +1,8 @@
+[binance]
+base_url = "ws://localhost:8080"
+symbol = ""
+enable = true
+
+[okx]
+base_url = "wss://ws.okx.com:8443/ws/v5/business"
+enable = false
