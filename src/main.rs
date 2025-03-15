@@ -2,10 +2,11 @@ use std::thread;
 use tokio::time::{sleep, Duration};
 use tokio::runtime::Builder;
 
-use MarketDataFeed::binance::{Binance};
+use MarketDataFeed::binance::Binance;
 use MarketDataFeed::common::ExchangeFeed;
 use MarketDataFeed::okx::OKX;
 use tokio::signal::ctrl_c;
+use MarketDataFeed::common::Service;
 
 #[tokio::main]
 async fn main() {
@@ -17,10 +18,8 @@ async fn main() {
     let binanceConfig = &configPath;
     let okxConfig = &configPath;
 
-    // let symbols = "btcusdt@kline_1m";
     startBinance( success_callback, binanceConfig.to_string());
 
-    // let symbols = "BTC-USDT@candle1m";
     startOKX(success_callback, okxConfig.to_string());
 
     let _ = ctrl_c().await;
@@ -29,10 +28,12 @@ async fn main() {
 
 fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 'static, config_path : String) {
     let binance = Binance::new(&config_path).unwrap();
-    if !binance.enable {
+    if !binance.enable() {
         println!("Binance disabled.");
         return;
     }
+
+    binance.start();
 
     let binance_thread = thread::spawn(move || {
         let rt: tokio::runtime::Runtime = match Builder::new_multi_thread()
@@ -47,6 +48,7 @@ fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 's
             }
         };
 
+        //TODO: make the retry logic inside library
         rt.block_on(async {
             println!("Started Binance thread: {:?}", std::thread::current().id());
             let max_retries = 5; // Maximum retry attempts
@@ -68,6 +70,7 @@ fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 's
                             sleep(delay).await;
                         } else {
                             eprintln!("Max retries reached. Exiting...");
+                            binance.stop();
                             return; // Exit after max retries
                         }
                     }
@@ -79,7 +82,7 @@ fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 's
 
 fn startOKX( success_callback: impl FnOnce(String) + Send + 'static, config_path : String) {
     let okx = OKX::new(&config_path).unwrap();
-    if !okx.enable {
+    if !okx.enable() {
         println!("OKX disabled.");
         return;
     }
@@ -101,7 +104,10 @@ fn startOKX( success_callback: impl FnOnce(String) + Send + 'static, config_path
             println!("Started OKX thread: {:?}", std::thread::current().id());
             match OKX::connect(&okx, success_callback).await {
                 Ok(msg) => print!("{:?}", msg),
-                Err(err) => eprint!("{:?}", err),
+                Err(err) => {
+                    eprint!("{:?}", err);
+                    okx.stop();
+                },
             }
         });
     });
