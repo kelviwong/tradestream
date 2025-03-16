@@ -24,7 +24,7 @@ async fn main() {
     println!("Received Ctrl+C, shutting down...");
 }
 
-fn start_exchange(exchange: impl ExchangeFeed + Send + Sync + 'static, pin_id: u8) {
+fn start_exchange(exchange: impl ExchangeFeed + Send + Sync + 'static, pin_id: usize) {
     let exchange_arc = Arc::new(Mutex::new(exchange));
     if !exchange_arc.lock().unwrap().enable() {
         println!("{} disabled.", exchange_arc.lock().unwrap().name());
