@@ -7,6 +7,7 @@ use MarketDataFeed::common::ExchangeFeed;
 use MarketDataFeed::okx::OKX;
 use tokio::signal::ctrl_c;
 use MarketDataFeed::common::Service;
+use MarketDataFeed::common::create_exchange;
 
 #[tokio::main]
 async fn main() {
@@ -27,7 +28,7 @@ async fn main() {
 }
 
 fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 'static, config_path : String) {
-    let binance = Binance::new(&config_path).unwrap();
+    let binance : Binance = create_exchange(&config_path);
     if !binance.enable() {
         println!("Binance disabled.");
         return;
@@ -56,7 +57,7 @@ fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 's
 
             while retries < max_retries {
                 let callback = success_callback.clone();
-                match Binance::connect(&binance, callback).await {
+                match binance.connect(callback).await {
                     Ok(msg) => {
                         println!("{:?}", msg);
                         return; // If connection is successful, exit the loop
@@ -81,7 +82,7 @@ fn startBinance(success_callback: impl FnOnce(String) + Send + Clone + Copy + 's
 }
 
 fn startOKX( success_callback: impl FnOnce(String) + Send + 'static, config_path : String) {
-    let okx = OKX::new(&config_path).unwrap();
+    let okx : OKX = create_exchange(&config_path);
     if !okx.enable() {
         println!("OKX disabled.");
         return;
@@ -102,7 +103,7 @@ fn startOKX( success_callback: impl FnOnce(String) + Send + 'static, config_path
 
         rt.block_on(async {
             println!("Started OKX thread: {:?}", std::thread::current().id());
-            match OKX::connect(&okx, success_callback).await {
+            match okx.connect(success_callback).await {
                 Ok(msg) => print!("{:?}", msg),
                 Err(err) => {
                     eprint!("{:?}", err);
