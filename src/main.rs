@@ -8,7 +8,13 @@ use tokio::signal::ctrl_c;
 
 #[tokio::main]
 async fn main() {
-    let config_path = "configs/config_test.toml".to_string();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO) // Ensure INFO logs are enabled
+        .init();
+
+    tracing::info!("Starting Server.");
+
+    let config_path = "configs/config.toml".to_string();
     let config = &config_path;
 
     start_binance(config);
@@ -18,7 +24,7 @@ async fn main() {
     println!("Received Ctrl+C, shutting down...");
 }
 
-fn start_exchange(exchange: impl ExchangeFeed + Send + Sync + 'static) {
+fn start_exchange(exchange: impl ExchangeFeed + Send + Sync + 'static, pin_id: u8) {
     let exchange_arc = Arc::new(Mutex::new(exchange));
     if !exchange_arc.lock().unwrap().enable() {
         println!("{} disabled.", exchange_arc.lock().unwrap().name());
@@ -26,15 +32,15 @@ fn start_exchange(exchange: impl ExchangeFeed + Send + Sync + 'static) {
     }
 
     exchange_arc.lock().unwrap().start();
-    ExchangeFeed::connect_on_thread(exchange_arc);
+    ExchangeFeed::connect_on_thread(exchange_arc, pin_id);
 }
 
 fn start_binance(config_path: &String) {
     let binance: Binance = create_exchange(&config_path);
-    start_exchange(binance);
+    start_exchange(binance, 3);
 }
 
 fn start_okx(config_path: &String) {
     let okx: OKX = create_exchange(&config_path);
-    start_exchange(okx);
+    start_exchange(okx,5);
 }
