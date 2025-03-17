@@ -42,5 +42,5 @@ fn start_binance(config_path: &String) {
 
 fn start_okx(config_path: &String) {
     let okx: OKX = create_exchange(&config_path);
-    start_exchange(okx,1);
+    start_exchange(okx,2);
 }
