@@ -37,7 +37,7 @@ fn start_exchange(exchange: impl ExchangeFeed + Send + Sync + 'static, pin_id: u
 
 fn start_binance(config_path: &String) {
     let binance: Binance = create_exchange(&config_path);
-    start_exchange(binance, 0);
+    start_exchange(binance, 1);
 }
 
 fn start_okx(config_path: &String) {
